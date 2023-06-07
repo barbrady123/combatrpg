@@ -18,6 +18,10 @@ public class PlayerController : MonoBehaviour
 
     private SpriteRenderer _spriteRenderer;
 
+    private bool _facingLeft = false;
+
+    public bool FacingLeft { get => _facingLeft; set => _facingLeft = value; }
+
     private void Awake()
     {
         _playerControls = new PlayerControls();
@@ -60,6 +64,7 @@ public class PlayerController : MonoBehaviour
         var mousePos = Input.mousePosition;
         var playerScreenPoint = Camera.main.WorldToScreenPoint(transform.position);
 
-        _spriteRenderer.flipX = Input.mousePosition.x < playerScreenPoint.x;
+        _facingLeft = Input.mousePosition.x < playerScreenPoint.x;
+        _spriteRenderer.flipX = _facingLeft;
     }
 }
