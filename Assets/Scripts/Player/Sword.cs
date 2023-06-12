@@ -25,7 +25,14 @@ public class Sword : MonoBehaviour
     [SerializeField]
     private Transform _weaponCollider;
 
+    [SerializeField]
+    private float _swordAttackCD = 0.5f;
+
     private GameObject _slashAnimation;
+
+    private bool _attackButtonDown = false;
+
+    private bool _isAttacking = false;
 
     private void Awake()
     {
@@ -54,22 +61,33 @@ public class Sword : MonoBehaviour
 
     private void Start()
     {
-        _playerControls.Combat.Attack.started += _ => Attack();
+        _playerControls.Combat.Attack.started += _ => StartAttacking();
+        _playerControls.Combat.Attack.canceled += _ => StopAttacking();
     }
 
     private void Update()
     {
         MouseFollowWithOffset();
+        Attack();
     }
 
     private void Attack()
     {
+        if (!_attackButtonDown)
+            return;
+
+        if (_isAttacking)
+            return;
+
+        _isAttacking = true;
+
         // fire our sword animation
         _animator.SetTrigger("Attack");
         _weaponCollider.gameObject.SetActive(true);
 
         _slashAnimation = Instantiate(_slashAnimPrefab, _slashAnimSpawnPoint.position, Quaternion.identity);
         _slashAnimation.transform.parent = this.transform.parent;
+        StartCoroutine(AttackCDRoutine());
     }
 
     public void DoneAttackingAnim()
@@ -86,5 +104,22 @@ public class Sword : MonoBehaviour
 
         _activeWeapon.transform.rotation = Quaternion.Euler(0f, (mousePos.x < playerScreenInput.x) ? -180f : 0f, angle);
         _weaponCollider.transform.rotation = Quaternion.Euler(0f, (mousePos.x < playerScreenInput.x) ? -180f : 0f, 0f);
+    }
+
+    // This is a convoluted way to setup this timer...
+    private IEnumerator AttackCDRoutine()
+    {
+        yield return new WaitForSeconds(_swordAttackCD);
+        _isAttacking = false;
+    }
+
+    private void StartAttacking()
+    {
+        _attackButtonDown = true;
+    }
+
+    private void StopAttacking()
+    {
+        _attackButtonDown = false;
     }
 }

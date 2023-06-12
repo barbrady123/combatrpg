@@ -1,10 +1,13 @@
 using UnityEngine;
+using UnityEngine.InputSystem.Controls;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(SpriteRenderer))]
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController Instance;
+
     [SerializeField]
     private float _moveSpeed = 1f;
 
@@ -24,6 +27,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        PlayerController.Instance = this;
         _playerControls = new PlayerControls();
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
