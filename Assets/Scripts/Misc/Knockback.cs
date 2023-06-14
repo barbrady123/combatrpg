@@ -16,10 +16,10 @@ public class Knockback : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    public void GetKnockedBack(Transform damageSource, float knockbackThrust)
+    public void GetKnockedBack(Transform damageSource, float knockbackPower)
     {
         this.GettingKnockedBack = true;
-        var diff = (transform.position - damageSource.position).normalized * knockbackThrust * _rb.mass;
+        var diff = (transform.position - damageSource.position).normalized * knockbackPower * _rb.mass;
         _rb.AddForce(diff, ForceMode2D.Impulse);
         StartCoroutine(KnockRoutine());
     }

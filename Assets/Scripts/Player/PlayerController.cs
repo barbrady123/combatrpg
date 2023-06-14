@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem.Controls;
 
@@ -11,6 +13,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float _moveSpeed = 1f;
 
+    [SerializeField]
+    private float _dashSpeedFactor = 4f;
+
+    private float _dashTime = 0.2f;
+
+    private float _dashCooldown = 1.0f;
+
+    private bool _isDashing = false;
+
+    private bool _dashOnCooldown = false;
+
     private PlayerControls _playerControls;
 
     private Vector2 _movement;
@@ -21,9 +34,11 @@ public class PlayerController : MonoBehaviour
 
     private SpriteRenderer _spriteRenderer;
 
+    private TrailRenderer _trailRenderer;
+
     private bool _facingLeft = false;
 
-    public bool FacingLeft { get => _facingLeft; set => _facingLeft = value; }
+    public bool FacingLeft => _facingLeft;
 
     private void Awake()
     {
@@ -32,6 +47,12 @@ public class PlayerController : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
+        _trailRenderer = gameObject.GetComponentInChildren<TrailRenderer>();
+    }
+
+    private void Start()
+    {
+        _playerControls.Combat.Dash.performed += _ => Dash();
     }
 
     private void Update()
@@ -60,15 +81,35 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        _rb.MovePosition(_rb.position + (_movement * (_moveSpeed * Time.fixedDeltaTime)));
+        float moveSpeed = _moveSpeed * (_isDashing ? _dashSpeedFactor : 1.0f);
+        _rb.MovePosition(_rb.position + (_movement * (moveSpeed * Time.fixedDeltaTime)));
     }
 
     private void AdjustPlayerFacingDirection()
     {
-        var mousePos = Input.mousePosition;
         var playerScreenPoint = Camera.main.WorldToScreenPoint(transform.position);
 
         _facingLeft = Input.mousePosition.x < playerScreenPoint.x;
         _spriteRenderer.flipX = _facingLeft;
+    }
+
+    private void Dash()
+    {
+        if (_dashOnCooldown)
+            return;
+
+        _isDashing = true;
+        _dashOnCooldown = true;
+        _trailRenderer.emitting = true;
+        StartCoroutine(EndDashRoutine());
+    }
+
+    private IEnumerator EndDashRoutine()
+    {
+        yield return new WaitForSeconds(_dashTime);
+        _trailRenderer.emitting = false;
+        _isDashing = false;
+        yield return new WaitForSeconds(_dashCooldown);
+        _dashOnCooldown = false;
     }
 }

@@ -4,6 +4,9 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyPathfinding))]
 public class EnemyAI : MonoBehaviour
 {
+    [SerializeField]
+    private float _roamChangeDiriectionTime = 2f;
+
     private enum State
     {
         Roaming = 0
@@ -29,7 +32,7 @@ public class EnemyAI : MonoBehaviour
         while (_state == State.Roaming)
         {
             _enemyPathfinding.MoveTo(GetRoamingPosition());
-            yield return new WaitForSeconds(2);
+            yield return new WaitForSeconds(_roamChangeDiriectionTime);
         }
     }
 
